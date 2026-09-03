@@ -1,52 +1,296 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Proyecto de Video</title>
+    <title>Sintetizador VideoMax - Retro Pixel</title>
+
+    <!-- Fuente Retro Pixel Art -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <style>
-        /* Estilos básicos para centrar el contenido y darle buen aspecto */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+        :root {
+            --pixel-yellow: #ffcc00;
+            --pixel-cyan: #00f0ff;
+            --pixel-red: #ff0055;
+            --ui-dark: rgba(14, 16, 27, 0.92);
+            --ui-border: #000000;
+            --text-main: #f4f4f4;
+            --shadow-block: 4px 4px 0px #000000;
+            --shadow-block-lg: 6px 6px 0px #000000;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            image-rendering: pixelated;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background-color: #04040c;
+            color: var(--text-main);
+            margin: 0;
+            padding: 2.5rem 1rem 4rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
 
+        /* Lienzo interactivo de la Nebulosa Carina en Pixel Art */
+        #spaceCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        /* Título pixel art y siempre amarillo */
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: var(--pixel-yellow) !important;
+            text-shadow: 3px 3px 0px #000000 !important;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.8rem;
+        }
+
+        header p {
+            color: var(--pixel-cyan);
+            font-size: 0.65rem;
+            line-height: 1.6;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        /* Contenedor tipo ventana OS / Chasis de sintetizador */
+        .video-window {
+            background-color: var(--ui-dark);
+            border: 4px solid var(--ui-border);
+            box-shadow: var(--shadow-block-lg);
+            width: 100%;
+            max-width: 680px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window-header {
+            background: #090a14;
+            border-bottom: 4px solid var(--ui-border);
+            padding: 0.6rem 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border: 1px solid #000;
+        }
+        .dot.red { background: var(--pixel-red); }
+        .dot.yellow { background: var(--pixel-yellow); }
+        .dot.green { background: #00ff66; }
+
+        .window-title {
+            font-size: 0.55rem;
+            color: var(--pixel-cyan);
+            text-shadow: 1px 1px 0px #000;
         }
 
         .video-container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #090a12;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* Relación de aspecto 16:9 */
+            height: 0;
+            border: 3px solid var(--ui-border);
+            box-shadow: var(--shadow-block);
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 0.95rem;
+            }
+            .video-container {
+                padding: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Mira este video</h1>
+    <!-- Fondo de la Nebulosa Carina en Pixel Art -->
+    <canvas id="spaceCanvas"></canvas>
+
+    <header>
+        <h1>DEMO SINTETIZADOR VIDEOMAX</h1>
+        <p>★ SÍNTESIS AM / FM Y SECUENCIACIÓN MODULAR ★</p>
+    </header>
     
-    <div class="video-container">
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/BHEd7KBmc1w?si=DIJZb59_35nXPq_r" 
-            title="YouTube video player" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            referrerpolicy="strict-origin-when-cross-origin" 
-            allowfullscreen>
-        </iframe>
+    <div class="video-window">
+        <div class="window-header">
+            <div class="window-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <span class="window-title">MAX/MSP - PLAYBACK</span>
+        </div>
+        <div class="video-container">
+            <div class="video-wrapper">
+                <iframe 
+                    src="https://www.youtube.com/embed/BHEd7KBmc1w?si=DIJZb59_35nXPq_r" 
+                    title="YouTube video player" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
     </div>
 
+    <script>
+        /* ========================================================
+           GENERADOR PIXEL ART DE LA NEBULOSA CARINA (JWST)
+           ======================================================== */
+        const canvas = document.getElementById('spaceCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const W = 320;
+        const H = 180;
+        canvas.width = W;
+        canvas.height = H;
+
+        function renderNebula() {
+            // 1. Cielo espacial profundo
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.7);
+            skyGrad.addColorStop(0, '#04040c');
+            skyGrad.addColorStop(0.3, '#08112b');
+            skyGrad.addColorStop(0.7, '#0f3254');
+            skyGrad.addColorStop(1, '#1b5a7a');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // 2. Gas cósmico difuso
+            for (let i = 0; i < 400; i++) {
+                const x = Math.floor(Math.random() * W);
+                const y = Math.floor(Math.random() * (H * 0.65));
+                ctx.fillStyle = Math.random() > 0.4 ? 'rgba(34, 130, 175, 0.25)' : 'rgba(235, 130, 60, 0.15)';
+                ctx.fillRect(x, y, 2, 2);
+            }
+
+            // 3. Estrellas con picos de difracción del James Webb (8 puntas)
+            const webbStars = [
+                {x: 60, y: 35, s: 2, c: '#ffed75'},
+                {x: 240, y: 40, s: 3, c: '#ffffff'},
+                {x: 180, y: 20, s: 1, c: '#8cedff'},
+                {x: 290, y: 70, s: 2, c: '#ffc857'},
+                {x: 120, y: 65, s: 1, c: '#ffffff'},
+                {x: 30, y: 80, s: 1, c: '#ffaa44'}
+            ];
+
+            webbStars.forEach(st => {
+                ctx.fillStyle = st.c;
+                ctx.fillRect(st.x - st.s, st.y - st.s, st.s * 2, st.s * 2);
+                for (let r = 1; r <= st.s * 4; r++) {
+                    ctx.fillRect(st.x + r, st.y, 1, 1);
+                    ctx.fillRect(st.x - r, st.y, 1, 1);
+                    ctx.fillRect(st.x, st.y + r, 1, 1);
+                    ctx.fillRect(st.x - r, st.y, 1, 1);
+                    if (r % 2 === 0) {
+                        ctx.fillRect(st.x + r/2, st.y + r/2, 1, 1);
+                        ctx.fillRect(st.x - r/2, st.y - r/2, 1, 1);
+                        ctx.fillRect(st.x + r/2, st.y - r/2, 1, 1);
+                        ctx.fillRect(st.x - r/2, st.y + r/2, 1, 1);
+                    }
+                }
+            });
+
+            // Microestrellas de fondo
+            for (let s = 0; s < 120; s++) {
+                ctx.fillStyle = Math.random() > 0.3 ? '#ffffff' : '#ffd085';
+                ctx.fillRect(Math.floor(Math.random() * W), Math.floor(Math.random() * (H * 0.7)), 1, 1);
+            }
+
+            // 4. Riscos dorados / Cosmic Cliffs
+            function getMountainHeight(x) {
+                return Math.sin(x * 0.02) * 18 + 
+                       Math.cos(x * 0.05) * 10 + 
+                       Math.sin(x * 0.1) * 4 + 
+                       (H * 0.52);
+            }
+
+            for (let x = 0; x < W; x++) {
+                const peakY = Math.floor(getMountainHeight(x));
+                for (let y = peakY; y < H; y++) {
+                    const depth = y - peakY;
+                    if (depth === 0) {
+                        ctx.fillStyle = (x % 3 === 0) ? '#fff5cc' : '#fca311';
+                    } else if (depth < 4) {
+                        ctx.fillStyle = '#e85d04';
+                    } else if (depth < 10) {
+                        ctx.fillStyle = '#dc2f02';
+                    } else if (depth < 22) {
+                        ctx.fillStyle = '#9d0208';
+                    } else if (depth < 45) {
+                        ctx.fillStyle = '#370617';
+                    } else {
+                        ctx.fillStyle = '#140207';
+                    }
+
+                    if (depth === 2 || depth === 6 || depth === 14 || depth === 28) {
+                        if ((x + y) % 2 === 0) ctx.fillStyle = '#03071e';
+                    }
+
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        renderNebula();
+    </script>
 </body>
 </html>
